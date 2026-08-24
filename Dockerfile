@@ -42,9 +42,18 @@ ENV FRONIUS_RETRIES=3
 ENV FRONIUS_RETRY_DELAY=1000
 ENV LOG_LEVEL=info
 
+# MCP transport defaults to stdio (used by Claude Desktop via `docker run -i`).
+# To expose a Streamable HTTP endpoint instead, set MCP_TRANSPORT=http and
+# MCP_HTTP_HOST=0.0.0.0 (see docker-compose.yml for a ready-made HTTP setup).
+ENV MCP_TRANSPORT=stdio
+ENV MCP_HTTP_HOST=0.0.0.0
+ENV MCP_HTTP_PORT=3000
+ENV MCP_HTTP_PATH=/mcp
+
 # Health check - test if server process is running
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD ps aux | grep -v grep | grep 'node dist/server.js' || exit 1
 
-# Start the server in stdio mode (use docker exec for MCP communication)
+# Start the server. Defaults to stdio (use `docker run -i` for MCP communication);
+# override the command or set MCP_TRANSPORT=http to serve over HTTP.
 CMD ["node", "dist/server.js"]

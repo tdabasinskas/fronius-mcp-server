@@ -15,9 +15,14 @@ services:
       - FRONIUS_DEVICE_ID=1
       - FRONIUS_RETRIES=3
       - FRONIUS_RETRY_DELAY=1000
-      
-      # MCP Server configuration (stdio mode for container)
-      - MCP_PORT=3000
+
+      # MCP Server configuration (HTTP transport so the port mapping and
+      # /health check below work; bind 0.0.0.0 so the port is reachable
+      # from outside the container).
+      - MCP_TRANSPORT=http
+      - MCP_HTTP_HOST=0.0.0.0
+      - MCP_HTTP_PORT=3000
+      - MCP_HTTP_PATH=/mcp
       - LOG_LEVEL=info
       
       # Runtime configuration

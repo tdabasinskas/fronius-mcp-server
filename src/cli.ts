@@ -22,7 +22,11 @@ program
   .option('--retry-delay <delay>', 'Delay between retries in ms', process.env.FRONIUS_RETRY_DELAY || '1000')
   .option('-l, --log-level <level>', 'Log level (error|warn|info|debug)', process.env.LOG_LEVEL || 'info')
   .option('--test-connection', 'Test connection and exit')
-  .option('--stdio', 'Use stdio transport (default for MCP)');
+  .option('--stdio', 'Use stdio transport (default for MCP)')
+  .option('--http', 'Use Streamable HTTP transport instead of stdio')
+  .option('--http-host <host>', 'HTTP transport bind host', process.env.MCP_HTTP_HOST || '127.0.0.1')
+  .option('--http-port <port>', 'HTTP transport port', process.env.MCP_HTTP_PORT || '3000')
+  .option('--http-path <path>', 'HTTP transport endpoint path', process.env.MCP_HTTP_PATH || '/mcp');
 
 program.action(async (options) => {
   try {
@@ -38,9 +42,21 @@ program.action(async (options) => {
     if (options.retryDelay) process.env.FRONIUS_RETRY_DELAY = options.retryDelay.toString();
     if (options.logLevel) process.env.LOG_LEVEL = options.logLevel;
 
+    // Transport selection: --http opts into HTTP, otherwise stdio (the default)
+    if (options.http) process.env.MCP_TRANSPORT = 'http';
+    if (options.httpHost) process.env.MCP_HTTP_HOST = options.httpHost;
+    if (options.httpPort) process.env.MCP_HTTP_PORT = options.httpPort.toString();
+    if (options.httpPath) process.env.MCP_HTTP_PATH = options.httpPath;
+
     // Validate protocol
     if (options.protocol && !['http', 'https'].includes(options.protocol)) {
       console.error('❌ Protocol must be either "http" or "https"');
+      process.exit(1);
+    }
+
+    // Guard against contradictory transport flags
+    if (options.http && options.stdio) {
+      console.error('❌ Cannot use --http and --stdio together');
       process.exit(1);
     }
 
@@ -63,6 +79,11 @@ program.action(async (options) => {
       console.error(`🌞 ${getName()} v${getVersion()}`);
       console.error(`📡 Connecting to: ${options.protocol}://${options.host}:${options.port}`);
       console.error(`🔧 Device ID: ${options.deviceId}, Timeout: ${options.timeout}ms`);
+      if (options.http) {
+        console.error(`🔌 Transport: http (${options.httpHost}:${options.httpPort}${options.httpPath})`);
+      } else {
+        console.error(`🔌 Transport: stdio`);
+      }
       console.error(`📝 Log Level: ${options.logLevel}`);
       console.error('');
     }
@@ -100,6 +121,8 @@ Examples:
   $ fronius-mcp-server --host 192.168.1.100 --protocol https --port 443
   $ fronius-mcp-server --test-connection
   $ fronius-mcp-server --log-level debug
+  $ fronius-mcp-server --http --http-port 3000
+  $ fronius-mcp-server --http --http-host 0.0.0.0 --http-port 3000
 
 Claude Desktop Configuration:
   {
@@ -120,6 +143,10 @@ Environment Variables:
   FRONIUS_DEVICE_ID         Default device ID (default: 1)
   FRONIUS_RETRIES           Retry attempts (default: 3)
   FRONIUS_RETRY_DELAY       Retry delay in ms (default: 1000)
+  MCP_TRANSPORT             Transport: stdio|http (default: stdio)
+  MCP_HTTP_HOST             HTTP bind host (default: 127.0.0.1)
+  MCP_HTTP_PORT             HTTP port (default: 3000)
+  MCP_HTTP_PATH             HTTP endpoint path (default: /mcp)
   LOG_LEVEL                 Log level (default: info)
 `);
 
