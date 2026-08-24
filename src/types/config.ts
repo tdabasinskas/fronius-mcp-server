@@ -13,8 +13,20 @@ export interface MCPConfig {
   version: string;
 }
 
+export interface HttpTransportConfig {
+  host: string;
+  port: number;
+  path: string;
+}
+
+export interface TransportConfig {
+  type: 'stdio' | 'http';
+  http: HttpTransportConfig;
+}
+
 export interface AppConfig {
   fronius: FroniusConfig;
   mcp: MCPConfig;
+  transport: TransportConfig;
   logLevel?: 'error' | 'warn' | 'info' | 'debug';
 }

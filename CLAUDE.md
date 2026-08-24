@@ -91,7 +91,20 @@ src/
 - `FRONIUS_DEVICE_ID` - Default device ID for inverter calls
 - `FRONIUS_RETRIES` - Number of retry attempts (default: 3)
 - `FRONIUS_RETRY_DELAY` - Delay between retries (default: 1000ms)
+- `MCP_TRANSPORT` - MCP transport: `stdio` or `http` (default: stdio)
+- `MCP_HTTP_HOST` - HTTP transport bind host (default: 127.0.0.1)
+- `MCP_HTTP_PORT` - HTTP transport port (default: 3000)
+- `MCP_HTTP_PATH` - HTTP transport endpoint path (default: /mcp)
 - `LOG_LEVEL` - Logging level (error/warn/info/debug)
+
+### Transports
+
+**server.ts** selects the MCP transport at startup based on `config.transport.type`:
+
+- **stdio** (default): a single `Server` connected over `StdioServerTransport` — unchanged behavior for Claude Desktop.
+- **http**: a Node `http.Server` (no framework dependency) serving `StreamableHTTPServerTransport` in **stateless** mode (`sessionIdGenerator: undefined`, `enableJsonResponse: true`). Each `POST {path}` builds a fresh `Server` (via `createServer()`) so concurrent requests never share JSON-RPC state; the `apiClient`/handlers are stateless and reused. `GET /health` returns `200 ok`; `GET`/`DELETE` on the MCP path return `405` (no SSE stream in stateless mode). No authentication — binds `127.0.0.1` by default.
+
+Handler wiring lives in `wireHandlers(server)` so it can be applied to each per-request server instance.
 
 ### API Architecture Notes
 

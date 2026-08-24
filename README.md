@@ -83,6 +83,10 @@ Available configuration options:
 - `FRONIUS_DEVICE_ID` - Default device ID (default: `1`)
 - `FRONIUS_RETRIES` - Number of retry attempts (default: `3`)
 - `FRONIUS_RETRY_DELAY` - Delay between retries in ms (default: `1000`)
+- `MCP_TRANSPORT` - MCP transport: `stdio` or `http` (default: `stdio`)
+- `MCP_HTTP_HOST` - HTTP transport bind host (default: `127.0.0.1`)
+- `MCP_HTTP_PORT` - HTTP transport port (default: `3000`)
+- `MCP_HTTP_PATH` - HTTP transport endpoint path (default: `/mcp`)
 - `LOG_LEVEL` - Log level: `error`, `warn`, `info`, `debug` (default: `info`)
 
 ### Example Configurations
@@ -102,6 +106,41 @@ FRONIUS_HOST=192.168.1.100
 FRONIUS_HOST=192.168.1.100
 FRONIUS_PROTOCOL=https
 FRONIUS_PORT=443
+```
+
+## Transports
+
+The server supports two MCP transports:
+
+- **stdio** (default) — used by Claude Desktop and most local MCP clients. Nothing to configure.
+- **Streamable HTTP** — exposes an HTTP endpoint for remote or containerized clients.
+
+### Using HTTP transport
+
+Enable it with the `--http` flag or `MCP_TRANSPORT=http`:
+
+```bash
+# via CLI flags
+fronius-mcp-server --http --http-port 3000
+
+# via environment
+MCP_TRANSPORT=http MCP_HTTP_PORT=3000 npm start
+```
+
+The endpoint is served at `POST http://<host>:<port>/mcp` (stateless request/response,
+JSON responses). A `GET /health` endpoint returns `200 ok` for container health checks.
+
+> **Security note:** the HTTP transport has no authentication. It binds to `127.0.0.1`
+> (local-only) by default. Only set `MCP_HTTP_HOST=0.0.0.0` when you intend to expose it
+> (e.g. inside Docker), and keep it behind a trusted network or reverse proxy.
+
+Quick check with `curl`:
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
 ## Installation Options

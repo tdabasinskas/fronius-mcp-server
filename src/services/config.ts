@@ -16,6 +16,14 @@ export function getDefaultConfig(): AppConfig {
       name: getName(),
       version: getVersion()
     },
+    transport: {
+      type: (process.env.MCP_TRANSPORT as 'stdio' | 'http') || 'stdio',
+      http: {
+        host: process.env.MCP_HTTP_HOST || '127.0.0.1',
+        port: parseInt(process.env.MCP_HTTP_PORT || '3000'),
+        path: process.env.MCP_HTTP_PATH || '/mcp'
+      }
+    },
     logLevel: (process.env.LOG_LEVEL as 'error' | 'warn' | 'info' | 'debug') || 'info'
   };
 }
@@ -38,6 +46,26 @@ export function validateConfig(config: AppConfig): string[] {
   if (config.fronius.defaultDeviceId && config.fronius.defaultDeviceId < 1) {
     errors.push('Fronius device ID must be positive');
   }
-  
+
+  if (!['stdio', 'http'].includes(config.transport.type)) {
+    errors.push('Transport type must be either "stdio" or "http"');
+  }
+
+  if (config.transport.type === 'http') {
+    const { host, port, path } = config.transport.http;
+
+    if (!host) {
+      errors.push('HTTP transport host is required');
+    }
+
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      errors.push('HTTP transport port must be between 1 and 65535');
+    }
+
+    if (!path.startsWith('/')) {
+      errors.push('HTTP transport path must start with "/"');
+    }
+  }
+
   return errors;
 }
