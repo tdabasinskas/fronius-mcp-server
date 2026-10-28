@@ -4,6 +4,12 @@ import type {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { FroniusAPIClient } from '../services/fronius-api.js';
 
+// Every tool only issues GET requests against the Fronius Solar API.
+const READ_ONLY_ANNOTATIONS: Tool['annotations'] = {
+  readOnlyHint: true,
+  openWorldHint: true
+};
+
 export class ToolHandler {
   constructor(private apiClient: FroniusAPIClient) {}
 
@@ -13,6 +19,7 @@ export class ToolHandler {
         {
           name: 'get_api_version',
           description: 'Get Fronius Solar API version information',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {},
@@ -22,6 +29,7 @@ export class ToolHandler {
         {
           name: 'get_system_status',
           description: 'Get system status and logger information',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {},
@@ -31,6 +39,7 @@ export class ToolHandler {
         {
           name: 'get_logger_led_info',
           description: 'Get logger LED status information',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {},
@@ -40,6 +49,7 @@ export class ToolHandler {
         {
           name: 'get_inverter_info',
           description: 'Get static inverter information',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -55,6 +65,7 @@ export class ToolHandler {
         {
           name: 'get_inverter_realtime',
           description: 'Get real-time inverter data including power, energy, voltage, current',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -76,6 +87,7 @@ export class ToolHandler {
         {
           name: 'get_meter_realtime',
           description: 'Get real-time smart meter data',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -92,6 +104,7 @@ export class ToolHandler {
         {
           name: 'get_powerflow_realtime',
           description: 'Get real-time power flow data showing energy production, consumption, and grid interaction',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {},
@@ -101,6 +114,7 @@ export class ToolHandler {
         {
           name: 'get_archive_data',
           description: 'Get historical archive data for a specific time period',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -145,6 +159,7 @@ export class ToolHandler {
         {
           name: 'get_sensor_realtime',
           description: 'Get real-time sensor data (temperature, irradiance, wind, etc.)',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -161,6 +176,7 @@ export class ToolHandler {
         {
           name: 'get_string_realtime',
           description: 'Get real-time DC string data (voltage and current per string)',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -177,6 +193,7 @@ export class ToolHandler {
         {
           name: 'get_storage_realtime',
           description: 'Get real-time battery storage data (state of charge, power, temperature)',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -191,6 +208,7 @@ export class ToolHandler {
         {
           name: 'get_ohmpilot_realtime',
           description: 'Get real-time OhmPilot data (smart heating element controller power and temperature)',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -205,6 +223,7 @@ export class ToolHandler {
         {
           name: 'get_active_devices',
           description: 'Get information about active devices in the system',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {
@@ -221,6 +240,7 @@ export class ToolHandler {
         {
           name: 'test_connection',
           description: 'Test the connection to the Fronius device',
+          annotations: READ_ONLY_ANNOTATIONS,
           inputSchema: {
             type: 'object',
             properties: {},
