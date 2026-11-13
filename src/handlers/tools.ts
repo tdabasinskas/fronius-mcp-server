@@ -4,9 +4,13 @@ import type {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { FroniusAPIClient } from '../services/fronius-api.js';
 
-// Every tool only issues GET requests against the Fronius Solar API.
+// Every tool only issues GET requests against the Fronius Solar API. All four
+// hints are explicit so clients never fall back to the spec defaults
+// (destructive, not idempotent).
 const READ_ONLY_ANNOTATIONS: Tool['annotations'] = {
   readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
   openWorldHint: true
 };
 
